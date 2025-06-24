@@ -1,6 +1,6 @@
 [project]
 name = "sticker-tools"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
 authors = [
     {name = "vbidula",email = "vadym.bidula@gmail.com"}
@@ -18,4 +18,4 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [project.scripts]
-sticker = "src.sticker_tools.cli_interface:create_sticker"
+sticker = "sticker_tools.cli_interface:create_sticker"
