@@ -34,9 +34,10 @@ files = [
 name = "pyqt6"
 version = "6.9.1"
 description = "Python bindings for the Qt cross platform application toolkit"
-optional = false
+optional = true
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"gui\""
 files = [
     {file = "pyqt6-6.9.1-cp39-abi3-macosx_10_14_universal2.whl", hash = "sha256:33c23d28f6608747ecc8bfd04c8795f61631af9db4fb1e6c2a7523ec4cc916d9"},
     {file = "pyqt6-6.9.1-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:37884df27f774e2e1c0c96fa41e817a222329b80ffc6241725b0dc8c110acb35"},
@@ -54,9 +55,10 @@ PyQt6-sip = ">=13.8,<14"
 name = "pyqt6-qt6"
 version = "6.9.1"
 description = "The subset of a Qt installation needed by PyQt6."
-optional = false
+optional = true
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"gui\""
 files = [
     {file = "pyqt6_qt6-6.9.1-py3-none-macosx_10_14_x86_64.whl", hash = "sha256:3854c7f83ee4e8c2d91e23ab88b77f90e2ca7ace34fe72f634a446959f2b4d4a"},
     {file = "pyqt6_qt6-6.9.1-py3-none-macosx_11_0_arm64.whl", hash = "sha256:123e4aeb037c099bb4696a3ea8edcb1d9d62cedd0b2b950556b26024c97f3293"},
@@ -70,9 +72,10 @@ files = [
 name = "pyqt6-sip"
 version = "13.10.2"
 description = "The sip module support for PyQt6"
-optional = false
+optional = true
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"gui\""
 files = [
     {file = "pyqt6_sip-13.10.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:8132ec1cbbecc69d23dcff23916ec07218f1a9bbbc243bf6f1df967117ce303e"},
     {file = "pyqt6_sip-13.10.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:07f77e89d93747dda71b60c3490b00d754451729fbcbcec840e42084bf061655"},
@@ -100,7 +103,10 @@ files = [
     {file = "pyqt6_sip-13.10.2.tar.gz", hash = "sha256:464ad156bf526500ce6bd05cac7a82280af6309974d816739b4a9a627156fafe"},
 ]
 
+[extras]
+gui = ["pyqt6"]
+
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.13"
-content-hash = "517614bfb76148ee3932bf93350924b25c55340215cf0c11d0d28186708ad650"
+python-versions = ">=3.12"
+content-hash = "a3e9218fd3204b41a051c4810c13f7457e57a5a28bb9e6ff4d481c7d05ead6d6"
