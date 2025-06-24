@@ -23,16 +23,49 @@ def get_duration(path):
 def estimate_bitrate(duration: float, target_size_kb: float) -> float:
     return target_size_kb * 1024 * 8 / duration
 
+def get_scalecrop_filter(path):
+    info = ffmpeg.probe(path)["streams"][0]
+    w = int(info["width"])
+    h = int(info["height"])
+    fr = info.get("avg_frame_rate", "0/1")
+    num, den = map(int, fr.split('/'))
+    fps = num / den if den else 0
+
+    filters = []
+
+    # scale the smallest dimension to 512, then center-crop the larger to 512
+    if w < h:
+        # scale width to 512, maintain aspect, then crop height
+        filters.append("scale=512:-1,crop=512:512:0:(ih-512)/2")
+    else:
+        # scale height to 512, maintain aspect, then crop width
+        filters.append("scale=-1:512,crop=512:512:(iw-512)/2:0")
+
+
+    if fps > 30:
+        filters.append("fps=30")
+
+    if not filters:
+        return None
+    return ",".join(filters)
+
 def vp9_pass1(input_path: str, vid_bps: float):
     """
     First pass: analyze video complexity for two-pass VP9 encoding.
     """
-    ffmpeg.input(input_path).output(
-        'null', format='null', **{'c:v': 'libvpx-vp9', 'b:v': str(vid_bps)}
-        ).global_args(
-            '-y', '-pass', '1', '-an', '-loglevel', 'quiet',
-            '-speed', '4'
-        ).run()
+    vf = get_scalecrop_filter(input_path)
+    stream = ffmpeg.input(input_path).video
+    # build output keyword arguments, adding filter if needed
+    output_kwargs = {'format': 'null', 'c:v': 'libvpx-vp9', 'b:v': str(vid_bps)}
+    if vf:
+        output_kwargs['vf'] = vf
+    stream.output(
+        'null',
+        **output_kwargs
+    ).global_args(
+        '-y', '-pass', '1', '-an', '-loglevel', 'quiet',
+        '-speed', '4'
+    ).run()
 
 
 
@@ -40,15 +73,22 @@ def vp9_pass2(input_path: str, output_path: str, vid_bps: float):
     """
     Second pass: encode video using two-pass VP9 with file-size guard.
     """
-    ffmpeg.input(input_path).output(
-        output_path, **{'c:v': 'libvpx-vp9', 'b:v': str(vid_bps)}
-        ).global_args(
-            '-pass', '2', '-an', '-y', '-loglevel', 'quiet',
-            '-deadline', 'best',
-            '-cpu-used', '1',
-            '-row-mt', '1',
-            '-tile-columns', '2',
-        ).run()
+    vf = get_scalecrop_filter(input_path)
+    stream = ffmpeg.input(input_path).video
+    # build output keyword arguments, adding filter if needed
+    output_kwargs = {'c:v': 'libvpx-vp9', 'b:v': str(vid_bps)}
+    if vf:
+        output_kwargs['vf'] = vf
+    stream.output(
+        output_path,
+        **output_kwargs
+    ).global_args(
+        '-pass', '2', '-an', '-y', '-loglevel', 'quiet',
+        '-deadline', 'best',
+        '-cpu-used', '1',
+        '-row-mt', '1',
+        '-tile-columns', '2'
+    ).run()
 
 
 def cleanup():
@@ -63,7 +103,7 @@ def convert(input_path: str, output_path: str, target_size_kb: float = 255):
     vp9_pass1(input_path, bitrate)
     vp9_pass2(input_path, output_path, bitrate)
 
-def convert_optimize(input_path: str, target_size_kb: float = 255, accuracy_kbps: float = 1):
+def convert_optimize(input_path: str, target_size_kb: float = 255, accuracy_kbps: float = 1, progress_callback=None):
     """
     Binary-search the target size in KB to find the optimal bitrate
     that yields a file just under target_size_kb.
@@ -77,7 +117,10 @@ def convert_optimize(input_path: str, target_size_kb: float = 255, accuracy_kbps
     last_loop = False
 
     # limited iterations to avoid infinite loop
-    while True:
+    for iteration in range(10):
+        if progress_callback:
+            progress_callback(iteration + 1)
+
         logger.info(f"Encoding with bitrate {best_bitrate/8192:.2f} kbps ...")
         vp9_pass1(input_path, best_bitrate)
         vp9_pass2(input_path, output_path, best_bitrate)
@@ -102,6 +145,10 @@ def convert_optimize(input_path: str, target_size_kb: float = 255, accuracy_kbps
                 logger.info(f"Returning to the best bitrate of: {best_bitrate / 8192:.2f} kbps")
             else:
                 break
+
+        if iteration == 9:
+            best_bitrate = low
+            last_loop = True
 
 
     logger.info(f"Success!")

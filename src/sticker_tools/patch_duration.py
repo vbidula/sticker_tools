@@ -112,7 +112,6 @@ def patch_duration(filename: str, new_seconds: float = 1) -> None:
     :param filename: Existing .webm file to read and patch
     :param new_seconds: new duration in seconds
     """
-
     logger = logging.getLogger("patch_duration")
     duration = read_duration(filename)
     logger.info(f"Read the file {filename}. Determined duration: {duration} sec")
