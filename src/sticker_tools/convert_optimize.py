@@ -1,6 +1,19 @@
 import ffmpeg
-import os
 import logging
+
+import sys
+import platform
+import os
+from pathlib import Path
+
+if platform.system() == 'Windows':
+    if getattr(sys, 'frozen', False):
+        base = Path(sys._MEIPASS)
+    else:
+        # when running from source, project root is two levels up
+        base = Path(__file__).resolve().parents[3]
+    bin_dir = base / 'bin'
+    os.environ['PATH'] = str(bin_dir) + os.pathsep + os.environ.get('PATH', '')
 
 logging.basicConfig(level=logging.INFO)
 
