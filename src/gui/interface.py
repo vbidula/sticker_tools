@@ -100,14 +100,7 @@ class FilePatcherApp(QWidget):
         # base directory for relative resources
         self._base_dir = os.path.dirname(os.path.abspath(__file__))
         self.setWindowTitle(f"{NAME} v{VERSION}")
-        # window icon (shows in dock on macOS)
-        icon = QIcon()
-        icon.addFile("appicons/app_icon_16.png", QSize(16, 16))
-        icon.addFile("appicons/app_icon_32.png", QSize(32, 32))
-        icon.addFile("appicons/app_icon_64.png", QSize(64, 64))
-        icon.addFile("appicons/app_icon_128.png", QSize(128, 128))
-        icon.addFile("appicons/app_icon_256.png", QSize(256, 256))
-        self.setWindowIcon(icon)
+
         self.resize(400, 400)
         self.setFixedSize(400, 400)
 

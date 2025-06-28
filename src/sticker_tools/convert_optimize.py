@@ -11,7 +11,7 @@ if platform.system() == 'Windows':
         base = Path(sys._MEIPASS)
     else:
         # when running from source, project root is two levels up
-        base = Path(__file__).resolve().parents[3]
+        base = Path(__file__).resolve().parents[2]
     bin_dir = base / 'bin'
     os.environ['PATH'] = str(bin_dir) + os.pathsep + os.environ.get('PATH', '')
 
@@ -128,6 +128,7 @@ def convert_optimize(input_path: str, target_size_kb: float = 255, accuracy_kbps
     high = estimate_bitrate(get_duration(input_path), target_size_kb)
     best_bitrate = high
     last_loop = False
+
 
     # limited iterations to avoid infinite loop
     for iteration in range(10):
