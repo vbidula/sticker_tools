@@ -25,12 +25,12 @@
 
       На Linux: 
    ```bash
-     sudo apt install ffmpeg
+   sudo apt install ffmpeg
    ```
 
       На MacOs: 
    ```zsh
-     brew install ffmpeg
+   brew install ffmpeg
    ```
 
       На Windows: Розбирайтеся самі, легше просто завантажити 
