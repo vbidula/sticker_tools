@@ -52,7 +52,7 @@ STATUS_DESCRIPTIONS = {
 }
 
 NAME = "Українська Класика"
-VERSION = "1.0"
+VERSION = "1.1.5"
 
 
 class FileLineEdit(QLineEdit):
