@@ -52,7 +52,7 @@
 
 Шаблон команди:
 ```bash
-   sticker path/to/your/file
+sticker path/to/your/file
 ```
 
 ## GUI
