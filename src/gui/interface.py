@@ -13,7 +13,7 @@ from PyQt6.QtCore import QSize
 
 
 from ..sticker_tools.patch_duration import patch_duration
-from ..sticker_tools.convert_optimize import convert_optimize
+from ..sticker_tools.convert_optimize import convert_optimize, cleanup
 
 
 class WorkerThread(QThread):
@@ -46,13 +46,13 @@ class WorkerThread(QThread):
 STATUS_DESCRIPTIONS = {
  "waiting_for_file": "Завантажте файл",
  "waiting_for_command": "Виберіть команду",
- "processing": "Працюю над стікером, зачекайте...",
+ "processing": "Працюю над наліпкою, зачекайте...",
  "success": "Готово!\nМожете завантажити ще один файл",
  "error": "Ой-ой, щось пішло не так...",
 }
 
 NAME = "Українська Класика"
-VERSION = "1.1.5"
+VERSION = "1.1.6"
 
 
 class FileLineEdit(QLineEdit):
@@ -225,6 +225,7 @@ class FilePatcherApp(QWidget):
             output = os.path.splitext(p)[0] + ".webm"
             convert_optimize(p, progress_callback=progress_callback)
             patch_duration(output)
+            cleanup(os.path.dirname(output))
         worker = WorkerThread(task_convert_and_patch, path)
         worker.finished.connect(self._on_worker_finished)
         # update status based on worker result
@@ -251,15 +252,15 @@ class FilePatcherApp(QWidget):
     def show_help(self):
         instructions = (
             "Варто знати:\n\n"
-            "1. Ця програма не вміє вирізати стікери з відео. Припускається, що у вас вже є обрізане відео у правильній "
+            "1. Ця програма не вміє вирізати наліпки з відео. Припускається, що у вас вже є підготоване відео у правильній "
             "роздільній здатності - 512х512 пікселів і не більше 30 fps.\n\n"
             "2. Ваш файл може бути в .mp4, .mov, .avi або .mkv. У вас зʼявиться можливість "
-            "\"конвертувати\" ваш файл в .webm формат. При цьому програма підбере найкращі параметри аби стікер виглядав "
+            "\"конвертувати\" ваш файл в .webm формат. При цьому програма підбере найкращі параметри аби наліпка виглядала "
             "якнайкраще при обмеженні в 256 кб. Конвертація може зайняти від кількох секунд до кількох хвилин - залежить "
             "від вхідного відео.\n\n"
             "3. Якщо файл уже конвертовано в .webm - зʼявиться кнопка \"пропатчити\" "
-            "(також автоматично застосовується після конвертації) редагує метадані вашого "
-            "стікера щоб замаскувати справжню тривалість. Таким чином, телеграм дозволить вам додати стікери, що тривають "
+            "(також автоматично застосовується після конвертації) редагує метадані вашої "
+            "наліпки щоб замаскувати справжню тривалість. Таким чином, телеграм дозволить вам додати наліпки, що тривають "
             "більше трьох секунд. \n"
             
             "\n\n"
@@ -279,6 +280,8 @@ class FilePatcherApp(QWidget):
         # update description label from mapping
         desc = STATUS_DESCRIPTIONS.get(status, status.capitalize())
         self.status_desc.setText(desc)
+        if hasattr(self, "file_edit"):
+            self.file_edit.setEnabled(status != "processing")
         # load and loop the corresponding GIF animation
         gif_path = os.path.join(self._base_dir, "status_animations", f"{status}.gif")
         movie = QMovie(gif_path)
