@@ -1,31 +1,10 @@
 import os
-
-import subprocess
 import sys
 
 if sys.platform == "win32":
     import ctypes
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("org.ukrclassics.ukrclassics")
 
-# Save the real Popen
-_real_popen = subprocess.Popen
-
-# Monkey-patch Popen
-def _patched_popen(*args, **kwargs):
-    if sys.platform == "win32":
-        # always add “no window” flag
-        cf = kwargs.get("creationflags", 0)
-        kwargs["creationflags"] = cf | 0x08000000  # CREATE_NO_WINDOW
-
-        # hide windows if startupinfo is used
-        si = kwargs.get("startupinfo", subprocess.STARTUPINFO())
-        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        si.wShowWindow = subprocess.SW_HIDE
-        kwargs["startupinfo"] = si
-
-    return _real_popen(*args, **kwargs)
-
-subprocess.Popen = _patched_popen
 
 from src.gui.interface import FilePatcherApp, QApplication, QIcon, QSize
 
